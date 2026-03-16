@@ -1,0 +1,3 @@
+[submodule "packages/bnmit-typst-report-template"]
+	path = packages/bnmit-typst-report-template
+	url = ./packages/bnmit-typst-report-template
