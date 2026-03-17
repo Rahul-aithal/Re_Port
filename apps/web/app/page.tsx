@@ -1,102 +1,103 @@
-import Image, { type ImageProps } from "next/image";
-import { Button } from "@repo/ui/button";
-import styles from "./page.module.css";
+'use client';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
-type Props = Omit<ImageProps, "src"> & {
-  srcLight: string;
-  srcDark: string;
-};
+interface ReportSummary {
+  _id: string;
+  title: string;
+  subject: string;
+  year: string;
+  updatedAt: string;
+}
 
-const ThemeImage = (props: Props) => {
-  const { srcLight, srcDark, ...rest } = props;
+export default function Dashboard() {
+  const [reports, setReports] = useState<ReportSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    fetchReports();
+  }, []);
+
+  const fetchReports = async () => {
+    try {
+      const res = await fetch('/api/report');
+      const data = await res.json();
+      if (Array.isArray(data)) setReports(data);
+    } catch (error) {
+      console.error('Failed to fetch reports:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createReport = async () => {
+    try {
+      const res = await fetch('/api/report', { method: 'POST' });
+      const data = await res.json();
+      if (data._id) router.push(`/report/${data._id}`);
+    } catch (error) {
+      console.error('Failed to create report:', error);
+    }
+  };
 
   return (
-    <>
-      <Image {...rest} src={srcLight} className="imgLight" />
-      <Image {...rest} src={srcDark} className="imgDark" />
-    </>
-  );
-};
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
+      <header className="px-8 py-6 flex justify-between items-center border-b border-border">
+        <h1 className="font-serif italic text-4xl tracking-tight">
+          Re:Port
+        </h1>
+        <button
+          onClick={createReport}
+          className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity cursor-pointer"
+        >
+          + New Report
+        </button>
+      </header>
 
-export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <ThemeImage
-          className={styles.logo}
-          srcLight="turborepo-dark.svg"
-          srcDark="turborepo-light.svg"
-          alt="Turborepo logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>apps/web/app/page.tsx</code>
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+      <main className="flex-1 px-8 py-12 max-w-6xl mx-auto w-full">
+        <h2 className="text-lg text-muted-foreground mb-8 font-medium">
+          Your Reports
+        </h2>
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new/clone?demo-description=Learn+to+implement+a+monorepo+with+a+two+Next.js+sites+that+has+installed+three+local+packages.&demo-image=%2F%2Fimages.ctfassets.net%2Fe5382hct74si%2F4K8ZISWAzJ8X1504ca0zmC%2F0b21a1c6246add355e55816278ef54bc%2FBasic.png&demo-title=Monorepo+with+Turborepo&demo-url=https%3A%2F%2Fexamples-basic-web.vercel.sh%2F&from=templates&project-name=Monorepo+with+Turborepo&repository-name=monorepo-turborepo&repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fturborepo%2Ftree%2Fmain%2Fexamples%2Fbasic&root-directory=apps%2Fdocs&skippable-integrations=1&teamSlug=vercel&utm_source=create-turbo"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://turborepo.dev/docs?utm_source"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-        <Button appName="web" className={styles.secondary}>
-          Open alert
-        </Button>
+        {loading ? (
+          <div className="text-muted-foreground">Loading...</div>
+        ) : reports.length > 0 ? (
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-6">
+            {reports.map((report) => (
+              <Link
+                key={report._id}
+                href={`/report/${report._id}`}
+                className="block bg-card text-card-foreground border border-border rounded-lg p-6 hover:shadow-md transition-shadow"
+              >
+                <h3 className="text-lg mb-2">{report.title}</h3>
+                <p className="text-muted-foreground text-sm mb-6">
+                  {report.subject || 'No Subject'} • {report.year || 'No Year'}
+                </p>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-muted-foreground font-mono">
+                    {new Date(report.updatedAt).toLocaleDateString()}
+                  </span>
+                  <span className="text-sm text-accent">Edit →</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="p-16 text-center bg-muted rounded-xl border border-dashed border-border">
+            <p className="text-muted-foreground mb-6">
+              No reports yet. Start by creating one.
+            </p>
+            <button
+              onClick={createReport}
+              className="bg-secondary text-secondary-foreground px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity cursor-pointer"
+            >
+              Create your first report
+            </button>
+          </div>
+        )}
       </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com/templates?search=turborepo&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://turborepo.dev?utm_source=create-turbo"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to turborepo.dev →
-        </a>
-      </footer>
     </div>
   );
 }
