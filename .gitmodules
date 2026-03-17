@@ -1,3 +1,3 @@
-[submodule "bnmit-typst-report-template"]
-	path = bnmit-typst-report-template
+[submodule "packages/bnmit-typst-report-template"]
+	path = packages/bnmit-typst-report-template
 	url = https://github.com/Rahul-aithal/Re_Port_Engine.git
