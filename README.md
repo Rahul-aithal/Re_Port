@@ -1,236 +1,159 @@
-# BNMIT Report Generator
+# Turborepo starter
 
-A full-stack web application that lets students fill in a multi-step form, stores the data in MongoDB, injects it into the official BNMIT Typst report template, and compiles a downloadable PDF report.
+This Turborepo starter is maintained by the Turborepo core team.
 
----
+## Using this example
 
-## Project Structure
+Run the following command:
 
-```
-bnmit-report-generator/
-│
-├── package.json                  ← root scripts (runs both simultaneously)
-│
-├── backend/
-│   ├── server.js                 ← Express entry point
-│   ├── package.json
-│   ├── .env.example              ← copy to .env and edit
-│   ├── models/
-│   │   └── Report.js             ← Mongoose schema (all template fields)
-│   ├── routes/
-│   │   └── reports.js            ← REST API routes
-│   ├── services/
-│   │   └── typstGenerator.js     ← Injects data → writes .typ files → compiles PDF
-│   ├── middleware/
-│   │   └── validate.js           ← express-validator rules
-│   └── outputs/                  ← generated PDFs live here (auto-created)
-│
-├── frontend/
-│   ├── index.html
-│   ├── vite.config.js
-│   ├── package.json
-│   └── src/
-│       ├── main.jsx
-│       ├── App.jsx               ← main orchestrator (form + navigation)
-│       ├── index.css             ← global styles + CSS variables
-│       ├── components/
-│       │   ├── UI.jsx            ← reusable Input, Textarea, Select, Button, Card...
-│       │   ├── Stepper.jsx       ← progress indicator
-│       │   ├── StepProject.jsx   ← Step 1: title, subject, semester
-│       │   ├── StepAuthors.jsx   ← Step 2: 1-4 authors with name + USN
-│       │   ├── StepGuide.jsx     ← Step 3: guide + department + HOD
-│       │   ├── StepAbstract.jsx  ← Step 4: abstract with word count
-│       │   ├── StepChapters.jsx  ← Step 5: 6 chapters in accordion
-│       │   ├── StepReferences.jsx← Step 6: Hayagriva YAML citations
-│       │   └── ResultScreen.jsx  ← success/failure after submission
-│       ├── pages/
-│       │   └── HistoryPage.jsx   ← list all past reports, download, delete
-│       └── utils/
-│           ├── api.js            ← all fetch() calls to backend
-│           └── constants.js      ← departments, semester words, step defs, empty form
-│
-└── bnmit-typst-report-template/  ← YOUR template folder (place here, see below)
-    ├── main.typ
-    ├── template.typ
-    ├── template-images/
-    └── ...
+```sh
+npx create-turbo@latest
 ```
 
----
+## What's inside?
 
-## Prerequisites
+This Turborepo includes the following packages/apps:
 
-| Tool    | Install |
-|---------|---------|
-| Node.js ≥ 18 | https://nodejs.org |
-| MongoDB ≥ 6  | https://www.mongodb.com/try/download/community |
-| Typst (latest) | https://github.com/typst/typst/releases — download binary and add to PATH |
+### Apps and Packages
 
-### Fonts required by the template
-| Font | Notes |
-|------|-------|
-| Times New Roman | Usually pre-installed on Windows/macOS. On Ubuntu: `sudo apt install ttf-mscorefonts-installer` |
-| Calibri | Pre-installed on Windows. Copy from Windows into `~/.local/share/fonts/` on Linux |
-| English111 Vivace BT | Decorative font for the BNMIT heading. Install manually |
+- `docs`: a [Next.js](https://nextjs.org/) app
+- `web`: another [Next.js](https://nextjs.org/) app
+- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
+- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
+- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
 
-> **Tip**: If fonts are missing, Typst will warn but may still compile with fallbacks.
+Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
 
----
+### Utilities
 
-## Setup
+This Turborepo has some additional tools already setup for you:
 
-### 1. Place the Typst template
+- [TypeScript](https://www.typescriptlang.org/) for static type checking
+- [ESLint](https://eslint.org/) for code linting
+- [Prettier](https://prettier.io) for code formatting
 
-Unzip `bnmit-typst-report-template` so the folder sits at:
+### Build
 
-```
-bnmit-report-generator/
-└── bnmit-typst-report-template/   ← HERE
-    ├── main.typ
-    ├── template.typ
-    ├── template-images/
-    └── [1] preamble/ ...
+To build all apps and packages, run the following command:
+
+With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+
+```sh
+cd my-turborepo
+turbo build
 ```
 
-### 2. Install dependencies
+Without global `turbo`, use your package manager:
 
-```bash
-# From the project root:
-npm run install:all
+```sh
+cd my-turborepo
+npx turbo build
+yarn dlx turbo build
+pnpm exec turbo build
 ```
 
-Or manually:
-```bash
-cd backend  && npm install
-cd frontend && npm install
+You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+
+With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+
+```sh
+turbo build --filter=docs
 ```
 
-### 3. Configure the backend
+Without global `turbo`:
 
-```bash
-cd backend
-cp .env.example .env
+```sh
+npx turbo build --filter=docs
+yarn exec turbo build --filter=docs
+pnpm exec turbo build --filter=docs
 ```
 
-Edit `.env`:
-```
-PORT=5000
-MONGO_URI=mongodb://localhost:27017/bnmit_reports
-FRONTEND_URL=http://localhost:5173
-```
+### Develop
 
-### 4. Start MongoDB
+To develop all apps and packages, run the following command:
 
-```bash
-# macOS (Homebrew)
-brew services start mongodb-community
+With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
 
-# Linux (systemd)
-sudo systemctl start mongod
-
-# Or just run: mongod
+```sh
+cd my-turborepo
+turbo dev
 ```
 
-### 5. Run in development
+Without global `turbo`, use your package manager:
 
-```bash
-# From root — starts both backend (5000) and frontend (5173) together:
-npm run dev
+```sh
+cd my-turborepo
+npx turbo dev
+yarn exec turbo dev
+pnpm exec turbo dev
 ```
 
-Or separately:
-```bash
-# Terminal 1
-cd backend && npm run dev
+You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
 
-# Terminal 2
-cd frontend && npm run dev
+With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+
+```sh
+turbo dev --filter=web
 ```
 
-Open: **http://localhost:5173**
+Without global `turbo`:
 
----
-
-## API Reference
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET`  | `/api/health` | Server + DB status |
-| `POST` | `/api/reports` | Create report + generate PDF |
-| `GET`  | `/api/reports` | List all reports (paginated) |
-| `GET`  | `/api/reports/:id` | Get full report |
-| `PUT`  | `/api/reports/:id` | Update + regenerate |
-| `POST` | `/api/reports/:id/regenerate` | Re-compile PDF without changing data |
-| `DELETE` | `/api/reports/:id` | Delete report + files |
-| `GET`  | `/outputs/:id/report.pdf` | Download generated PDF |
-
-### POST /api/reports — Request Body
-
-```json
-{
-  "title": "Smart Attendance System",
-  "subject": "Mini Project",
-  "subjectCode": "21CSL66",
-  "year": "2025-26",
-  "semesterNumber": 5,
-  "semesterWord": "Fifth",
-  "section": "A",
-  "authors": [
-    { "name": "Riya Sharma", "usn": "1BG23CS042" },
-    { "name": "Arun Kumar",  "usn": "1BG23CS018" }
-  ],
-  "guide": {
-    "name": "Dr. Priya Nair",
-    "designation": "Professor",
-    "departmentAbbr": "CSE",
-    "departmentFull": "Computer Science and Engineering"
-  },
-  "departmentName": "Computer Science and Engineering",
-  "departmentAbbr": "CSE",
-  "hod": "Dr. Krishnamurthy G N",
-  "abstract": "This project proposes a face recognition based attendance system...",
-  "introduction": "Chapter 1 content...",
-  "literatureSurvey": "Chapter 2 content...",
-  "systemRequirements": "Chapter 3 content...",
-  "methodology": "Chapter 4 content...",
-  "results": "Chapter 5 content...",
-  "conclusion": "Chapter 6 content...",
-  "citations": ""
-}
+```sh
+npx turbo dev --filter=web
+yarn exec turbo dev --filter=web
+pnpm exec turbo dev --filter=web
 ```
 
----
+### Remote Caching
 
-## How It Works
+> [!TIP]
+> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
 
-1. User fills multi-step form → clicks **Generate Report**
-2. Frontend POSTs JSON to `POST /api/reports`
-3. Backend saves to MongoDB
-4. `typstGenerator.js`:
-   - Creates a temp folder in `backend/outputs/<reportId>/`
-   - Copies the entire template into it
-   - Writes `citations.yaml` from form data
-   - Writes all 6 chapter `.typ` files with real content
-   - Writes `main.typ` with all variables injected (title, authors array, guide, department, etc.)
-   - Runs `typst compile main.typ report.pdf`
-5. PDF path stored in MongoDB, URL returned to frontend
-6. Frontend shows **Download PDF** button
+Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
 
----
+By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
 
-## Troubleshooting
+With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
 
-**`typst: command not found`**
-- Download the binary from https://github.com/typst/typst/releases
-- Add it to your PATH: `export PATH=$PATH:/path/to/typst`
+```sh
+cd my-turborepo
+turbo login
+```
 
-**MongoDB connection refused**
-- Make sure `mongod` is running: `sudo systemctl start mongod`
+Without global `turbo`, use your package manager:
 
-**PDF fails with font errors**
-- Install missing fonts (see Prerequisites table above)
-- Or modify `template.typ` to use available fonts
+```sh
+cd my-turborepo
+npx turbo login
+yarn exec turbo login
+pnpm exec turbo login
+```
 
-**PDF fails with "decasify" package error**
-- This is a Typst package — Typst should auto-download it on first compile
-- Make sure you have internet access on first run
+This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+
+Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+
+With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+
+```sh
+turbo link
+```
+
+Without global `turbo`:
+
+```sh
+npx turbo link
+yarn exec turbo link
+pnpm exec turbo link
+```
+
+## Useful Links
+
+Learn more about the power of Turborepo:
+
+- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
+- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
+- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
+- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
+- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
+- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
